@@ -1,7 +1,13 @@
 import Square from "./Square";
 import React from "react";
+import InN from "./InN";
 
 class Board extends React.Component {
+
+  constructor(props) {
+    super(props);
+      
+    };
                     
   renderSquare(i) {
     return (

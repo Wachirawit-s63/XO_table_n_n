@@ -1,5 +1,6 @@
 import Board from "./Board"
 import React from "react";
+import InN from "./InN"
 
 function calculateWinner(squares) {
     const lines = [
@@ -94,6 +95,7 @@ class Game extends React.Component {
                 <div>{status}</div>
                 <ol>{moves}</ol>
               </div>
+              <InN/>
             </div>
         );
     }
