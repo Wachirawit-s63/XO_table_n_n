@@ -1,38 +1,74 @@
 import Board from "./Board"
 import React from "react";
 
-  function calculateWinner(squares, dimension){
-    const rows = new Array(dimension).fill(0);
-    const cols = new Array(dimension).fill(0);
-    const diag = new Array(2).fill(0);
-    for (let row = 0; row < dimension; row++) {
-      for (let col = 0; col < dimension; col++) {
-        const square = squares[row * dimension + col];
-        if (square === "X") {
-          rows[row]++;
-          cols[col]++;
-        }
-        else if (square === "O") {
-          rows[row]--;
-          cols[col]--;
-        }
-        if (row === col) 
-          diag[0] += square === "X" ? 1 : -1;
-        if (row === dimension - col - 1) 
-          diag[1] += square === "X" ? 1 : -1;
-      }
+function convertto2D(squares, size){
+  let area = []
+  for (let i = 0 ; i < size ; i++){
+    let row = []
+    for ( let j = 0 ; j < size ; j++){
+      row.push(squares[i*size+j])
     }
-    for (let i = 0; i < dimension; i++) {
-      if (rows[i] === dimension || cols[i] === dimension) 
-          return "X";
-      else if (rows[i] === -dimension || cols[i] === -dimension) 
-          return "O";
-    }
-    if (diag[0] === dimension || diag[1] === dimension) 
-      return "X";
-    
-    return null;
+  area.push(row)
   }
+    return area;
+}
+
+function calculateWinner(squares,size){
+ const D2 = convertto2D(squares,size)
+
+ //horizon
+  for (let i = 0; i< size ; i++){
+    let correct = []
+    for (let j = 0; j< size ; j++){
+    correct.push(D2[i][j])
+    }
+    if (correct.every((Win)=>Win==='X')){
+      return 'X'
+    } else if (correct.every((Win)=>Win==='O')){
+      return 'O'
+    }
+  }
+
+//vertical
+for (let i = 0; i< size ; i++){
+  let correct = []
+  for (let j = 0; j< size ; j++){
+  correct.push(D2[j][i])
+  }
+  if (correct.every((Win)=>Win==='X')){
+    return 'X'
+  } else if (correct.every((Win)=>Win==='O')){
+    return 'O'
+  }
+}
+
+//diagonal Bottom right
+for (let i = 0; i< size ; i++){
+  let correct = []
+  for (let j = 0; j< size ; j++){
+  correct.push(D2[j][j])
+  }
+  if (correct.every((Win)=>Win==='X')){
+    return 'X'
+  } else if (correct.every((Win)=>Win==='O')){
+    return 'O'
+  }
+}
+
+//diagonal Bottom left
+for (let i = 0; i< size ; i++){
+  let correct = []
+  for (let j = 0; j< size ; j++){
+  correct.push(D2[j][size-j-1])
+  }
+  if (correct.every((Win)=>Win==='X')){
+    return 'X'
+  } else if (correct.every((Win)=>Win==='O')){
+    return 'O'
+  }
+}
+  return null;
+}
 
 class Game extends React.Component {
   
@@ -57,7 +93,8 @@ class Game extends React.Component {
       this.setState({size:event.target.value ,
       history: [{
         squares: Array((event.target.value)*(event.target.value)).fill(null)
-      }] 
+      }] ,
+      stepNumber: 0
     })
   }}
 
@@ -65,7 +102,7 @@ class Game extends React.Component {
         const history = this.state.history.slice(0, this.state.stepNumber + 1);
         const current = history[history.length - 1];
         const squares = current.squares.slice();
-        if (calculateWinner(squares) || squares[i]) {
+        if (calculateWinner(squares,parseInt(this.state.size)) || squares[i]) {
           return;
         }
         squares[i] = this.state.xIsNext ? 'X' : 'O';
@@ -105,7 +142,7 @@ class Game extends React.Component {
     render() {
         const history = this.state.history;
         const current = history[this.state.stepNumber];
-        const winner = calculateWinner(this.state.size,current.squares,parseInt(this.state.size));
+        const winner = calculateWinner(current.squares,parseInt(this.state.size));
         const moves = history.map((step, move) => {
           const desc = move ?
             'Go to move #' + move :
@@ -118,9 +155,7 @@ class Game extends React.Component {
         });
 
         let status;
-        if (winner== "X") {
-          status = "winner: " + winner;
-        }  else if (winner == "O"){
+        if (winner) {
           status = "winner: " + winner;
         } else {
           status = "Next player: " + (this.state.xIsNext ? "X" : "O");
